@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a8f5b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Devises">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Convertisseur de devises</title>
+<style>
+:root{--bg:#f2f5fa;--card:#fff;--text:#122038;--muted:#6a7792;--line:#e1e7f1;--accent:#0a8f5b;--accent2:#0b6e8f;--warn:#c27a00;--shadow:0 4px 18px rgba(18,32,56,.07)}
+:root[data-theme="dark"]{--bg:#0d1322;--card:#161e34;--text:#eef1fa;--muted:#94a1c0;--line:#252f4d;--accent:#2fd39a;--accent2:#4cc3e8;--warn:#f0b24a;--shadow:none}
+@media(prefers-color-scheme:dark){:root[data-theme="auto"]{--bg:#0d1322;--card:#161e34;--text:#eef1fa;--muted:#94a1c0;--line:#252f4d;--accent:#2fd39a;--accent2:#4cc3e8;--warn:#f0b24a;--shadow:none}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 24px)}
+.wrap{max-width:520px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+h1{font-size:19px;margin:0;display:flex;align-items:center;gap:8px}
+h1 i{font-style:normal;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:16px}
+.tools{display:flex;gap:6px}
+.ib{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;min-width:38px;height:38px;padding:0 10px;font-size:14px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+label.l{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+#amount{width:100%;font-size:30px;font-weight:800;border:none;border-bottom:2px solid var(--line);background:transparent;color:var(--text);padding:4px 0 8px;outline:none}
+#amount:focus{border-color:var(--accent)}
+.chips{display:flex;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
+.chip{flex:none;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:999px;padding:6px 12px;font-size:13px}
+.pair{display:grid;grid-template-columns:1fr 42px 1fr;gap:8px;align-items:center;margin-top:16px}
+.cur{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:12px;padding:10px;text-align:left;min-width:0;width:100%}
+.cur .fl{font-size:22px}
+.cur .t{min-width:0}
+.cur b{display:block;font-size:16px}
+.cur small{display:block;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.swap{height:42px;width:42px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:18px;transition:transform .25s}
+.swap.spin{transform:rotate(180deg)}
+.res{margin-top:16px;border-radius:14px;padding:14px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));position:relative}
+.res .big{font-size:28px;font-weight:800;word-break:break-word;padding-right:44px}
+.res .sm{font-size:13px;opacity:.92;margin-top:5px;line-height:1.45}
+.copy{position:absolute;right:10px;top:10px;border:none;background:rgba(255,255,255,.22);color:#fff;border-radius:10px;height:34px;width:34px;font-size:15px}
+.status{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--muted)}
+.status.stale #stat{color:var(--warn)}
+.status button{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);margin-right:6px}
+.dot.live{background:#1fbf75}.dot.cached{background:var(--warn)}
+h2{font-size:13px;margin:0 0 6px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:flex;justify-content:space-between}
+.row{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+.row:first-of-type{border-top:none}
+.row .fl{font-size:22px}
+.row .nm{flex:1;min-width:0}
+.row .nm b{display:block;font-size:14px}
+.row .nm small{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.row .v{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;font-size:15px;word-break:break-word;max-width:50%}
+.empty{color:var(--muted);font-size:13px;padding:6px 0}
+/* sheet */
+.ov{position:fixed;inset:0;background:rgba(5,10,25,.5);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.open{display:flex}
+.sheet{background:var(--card);width:100%;max-width:520px;max-height:82vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);animation:up .22s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sh{padding:14px 14px 8px;display:flex;gap:8px}
+#q{flex:1;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);outline:none}
+.list{overflow-y:auto;padding:0 8px 10px}
+.it{display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:10px;cursor:pointer}
+.it:active{background:var(--bg)}
+.it .fl{font-size:22px}
+.it .nm{flex:1;min-width:0}
+.it .nm b{display:block;font-size:14px}
+.it .nm small{color:var(--muted);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.star{border:none;background:none;font-size:22px;color:var(--muted);padding:4px 8px}
+.star.on{color:#f2b01e}
+.grp{font-size:11px;color:var(--muted);padding:10px 8px 4px;text-transform:uppercase;letter-spacing:.05em}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);background:#122038;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><i>⇄</i><span id="title"></span></h1>
+    <div class="tools">
+      <button class="ib" id="installBtn" hidden></button>
+      <button class="ib" id="themeBtn" aria-label="theme">🌓</button>
+      <button class="ib" id="langBtn"></button>
+    </div>
+  </header>
+
+  <div class="card">
+    <label class="l" for="amount" id="lAmount"></label>
+    <input id="amount" type="text" inputmode="decimal" autocomplete="off">
+    <div class="chips" id="chips"></div>
+
+    <div class="pair">
+      <button class="cur" id="fromBtn"></button>
+      <button class="swap" id="swap" aria-label="swap">⇄</button>
+      <button class="cur" id="toBtn"></button>
+    </div>
+
+    <div class="res">
+      <button class="copy" id="copy" aria-label="copy">⧉</button>
+      <div class="big" id="out">—</div>
+      <div class="sm" id="rate"></div>
+    </div>
+
+    <div class="status" id="statusBox">
+      <span><span class="dot" id="dot"></span><span id="stat"></span></span>
+      <button id="refresh"></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span id="lFav"></span><span id="lHint" style="text-transform:none;letter-spacing:0;font-weight:500"></span></h2>
+    <div id="favs"></div>
+  </div>
+</div>
+
+<div class="ov" id="ov">
+  <div class="sheet">
+    <div class="sh"><input id="q" type="search" autocomplete="off"><button class="ib" id="closeSheet">✕</button></div>
+    <div class="list" id="list"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+
+/* ---------- config ---------- */
+var FALLBACK={USD:1,EUR:0.86,GBP:0.75,XAF:564,XOF:564,NGN:1500,GHS:11,ZAR:18,MAD:9.2,DZD:132,TND:2.9,EGP:48,KES:129,TZS:2500,UGX:3600,RWF:1450,ETB:140,CDF:2250,AOA:915,XPF:103,CAD:1.38,MXN:18.5,BRL:5.4,ARS:1450,CLP:950,COP:3900,PEN:3.4,CNY:7.1,JPY:150,KRW:1400,INR:88,PKR:280,BDT:122,IDR:16500,MYR:4.2,SGD:1.3,THB:33,VND:26000,PHP:58,HKD:7.8,TWD:31,AED:3.6725,SAR:3.75,QAR:3.64,KWD:0.31,ILS:3.4,TRY:42,CHF:0.8,SEK:9.4,NOK:10,DKK:6.4,PLN:3.65,CZK:21,HUF:340,RON:4.4,RUB:80,UAH:41,AUD:1.5,NZD:1.7};
+var FLAG={EUR:"🇪🇺",XAF:"🇨🇲",XOF:"🌍",XPF:"🇵🇫",XCD:"🌎",XCG:"🇨🇼",ANG:"🇨🇼",XDR:"🏦",XAU:"🪙",XAG:"🪙",XPT:"🪙",XPD:"🪙",USD:"🇺🇸",GBP:"🇬🇧"};
+var QUICK=[1,100,1000,10000,100000];
+var APIS=[
+ {url:"https://open.er-api.com/v6/latest/USD",parse:function(d){return d&&d.result==="success"?d.rates:null}},
+ {url:"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",parse:function(d){if(!d||!d.usd)return null;var o={};Object.keys(d.usd).forEach(function(k){o[k.toUpperCase()]=d.usd[k]});return o}}
+];
+var T={
+ fr:{title:"Devises",amount:"Montant",fav:"Mes devises",hint:"★ pour ajouter",refresh:"Actualiser",live:"Taux en direct",cached:"Taux enregistrés",fb:"Taux approximatifs",upd:"maj",search:"Rechercher (code ou nom)",favs:"Favoris",rec:"Récentes",all:"Toutes les devises",copied:"Résultat copié",fail:"Copie impossible",ok:"Taux mis à jour",offline:"Hors ligne : derniers taux utilisés",install:"Installer",ios:"Safari : Partager → Sur l'écran d'accueil",nofav:"Aucune devise favorite",stale:"Taux anciens",lang:"EN",invalid:"Entrez un montant"},
+ en:{title:"Currency",amount:"Amount",fav:"My currencies",hint:"★ to add",refresh:"Refresh",live:"Live rates",cached:"Saved rates",fb:"Approximate rates",upd:"upd",search:"Search (code or name)",favs:"Favorites",rec:"Recent",all:"All currencies",copied:"Result copied",fail:"Copy failed",ok:"Rates updated",offline:"Offline: using last rates",install:"Install",ios:"Safari: Share → Add to Home Screen",nofav:"No favorite currencies",stale:"Old rates",lang:"FR",invalid:"Enter an amount"}
+};
+
+/* ---------- state ---------- */
+var S={lang:(navigator.language||"fr").slice(0,2)==="en"?"en":"fr",theme:"auto",amount:"1000",from:"XAF",to:"USD",favs:["XAF","USD","EUR","GBP","NGN","CAD","CNY","MAD"],recents:[]};
+var rates=Object.assign({},FALLBACK),source="fb",stamp=0,target="from";
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function save(){ls("fx_state",JSON.stringify(S))}
+try{var sv=JSON.parse(ls("fx_state")||"null");if(sv)Object.assign(S,sv)}catch(e){}
+try{var sr=JSON.parse(ls("fx_rates")||"null");if(sr&&sr.USD){rates=sr;source="cached";stamp=parseInt(ls("fx_stamp"),10)||0}}catch(e){}
+var t=function(k){return T[S.lang][k]};
+
+/* ---------- helpers ---------- */
+function flag(c){if(FLAG[c])return FLAG[c];return String.fromCodePoint.apply(null,c.slice(0,2).split("").map(function(ch){return 127397+ch.charCodeAt(0)}))}
+var dn=null;
+function name(c){try{if(!dn||dn._l!==S.lang){dn=new Intl.DisplayNames([S.lang],{type:"currency"});dn._l=S.lang}return dn.of(c)||c}catch(e){return c}}
+function loc(){return S.lang==="fr"?"fr-FR":"en-US"}
+function num(n){if(!isFinite(n))return"—";var a=Math.abs(n);return new Intl.NumberFormat(loc(),a>=1?{maximumFractionDigits:2}:{maximumSignificantDigits:6}).format(n)}
+function conv(a,f,to){return a/rates[f]*rates[to]}
+function amt(){var v=parseFloat(String(S.amount).replace(/\s/g,"").replace(",","."));return isFinite(v)&&v>=0?v:NaN}
+function norm(s){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
+function toast(m){var e=$("toast");e.textContent=m;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(function(){e.classList.remove("show")},2000)}
+function codes(){
+  var all=Object.keys(rates).filter(function(c){return /^[A-Z]{3}$/.test(c)&&isFinite(rates[c])&&rates[c]>0});
+  try{if(Intl.supportedValuesOf){var ok=new Set(Intl.supportedValuesOf("currency"));all=all.filter(function(c){return ok.has(c)})}}catch(e){}
+  return all.sort();
+}
+
+/* ---------- render ---------- */
+function curBtn(c){return '<span class="fl">'+flag(c)+'</span><span class="t"><b>'+c+'</b><small>'+name(c)+'</small></span>'}
+function applyTheme(){document.documentElement.setAttribute("data-theme",S.theme);$("themeBtn").textContent=S.theme==="auto"?"🌓":S.theme==="dark"?"🌙":"☀️";
+  var dark=S.theme==="dark"||(S.theme==="auto"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);
+  document.querySelector('meta[name=theme-color]').setAttribute("content",dark?"#0d1322":"#0a8f5b")}
+function render(){
+  document.documentElement.lang=S.lang;
+  $("title").textContent=t("title");$("lAmount").textContent=t("amount");$("lFav").textContent=t("fav");$("lHint").textContent=t("hint");
+  $("refresh").textContent=t("refresh");$("langBtn").textContent=t("lang");$("q").placeholder=t("search");$("installBtn").textContent="⬇ "+t("install");
+  document.title=t("title")+" – "+S.from+"/"+S.to;
+  if(document.activeElement!==$("amount"))$("amount").value=S.amount;
+  $("fromBtn").innerHTML=curBtn(S.from);$("toBtn").innerHTML=curBtn(S.to);
+  $("chips").innerHTML=QUICK.map(function(q){return '<button class="chip" data-a="'+q+'">'+new Intl.NumberFormat(loc()).format(q)+'</button>'}).join("");
+  var a=amt();
+  if(isNaN(a)){$("out").textContent="—";$("rate").textContent=t("invalid")}
+  else{
+    $("out").textContent=num(conv(a,S.from,S.to))+" "+S.to;
+    $("rate").innerHTML="1 "+S.from+" = "+num(conv(1,S.from,S.to))+" "+S.to+"<br>1 "+S.to+" = "+num(conv(1,S.to,S.from))+" "+S.from;
+  }
+  var age=stamp?Date.now()-stamp:0,stale=source!=="fb"&&age>864e5;
+  $("statusBox").className="status"+(stale||source==="fb"?" stale":"");
+  $("dot").className="dot "+(source==="live"?"live":source==="cached"?"cached":"");
+  var lbl=source==="live"?t("live"):source==="cached"?(stale?t("stale"):t("cached")):t("fb");
+  $("stat").textContent=lbl+(stamp?" · "+t("upd")+" "+new Date(stamp).toLocaleString(loc(),{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"");
+  var list=S.favs.filter(function(c){return rates[c]&&c!==S.from});
+  $("favs").innerHTML=list.length?list.map(function(c){
+    return '<div class="row" data-c="'+c+'"><span class="fl">'+flag(c)+'</span><div class="nm"><b>'+c+'</b><small>'+name(c)+'</small></div><div class="v">'+(isNaN(a)?"—":num(conv(a,S.from,c)))+'</div></div>'}).join(""):'<div class="empty">'+t("nofav")+'</div>';
+}
+function renderSheet(){
+  var q=norm($("q").value.trim()),all=codes(),h="";
+  function item(c){return '<div class="it" data-c="'+c+'"><span class="fl">'+flag(c)+'</span><div class="nm"><b>'+c+'</b><small>'+name(c)+'</small></div><button class="star'+(S.favs.indexOf(c)>-1?" on":"")+'" data-s="'+c+'">'+(S.favs.indexOf(c)>-1?"★":"☆")+'</button></div>'}
+  if(q){
+    var m=all.filter(function(c){return norm(c).indexOf(q)>-1||norm(name(c)).indexOf(q)>-1});
+    h=m.map(item).join("")||'<div class="empty" style="padding:14px">—</div>';
+  }else{
+    var fav=S.favs.filter(function(c){return all.indexOf(c)>-1}),rec=S.recents.filter(function(c){return all.indexOf(c)>-1&&fav.indexOf(c)<0}).slice(0,4);
+    if(fav.length)h+='<div class="grp">'+t("favs")+'</div>'+fav.map(item).join("");
+    if(rec.length)h+='<div class="grp">'+t("rec")+'</div>'+rec.map(item).join("");
+    h+='<div class="grp">'+t("all")+'</div>'+all.map(item).join("");
+  }
+  $("list").innerHTML=h;
+}
+
+/* ---------- rates ---------- */
+function getJSON(u){var c=new AbortController(),id=setTimeout(function(){c.abort()},8000);
+  return fetch(u,{signal:c.signal}).then(function(r){clearTimeout(id);if(!r.ok)throw 0;return r.json()})}
+function refresh(manual){
+  $("stat").textContent="…";
+  var i=0;
+  function next(){
+    if(i>=APIS.length){if(manual)toast(t("offline"));render();return Promise.resolve()}
+    var api=APIS[i++];
+    return getJSON(api.url).then(function(d){
+      var r=api.parse(d);
+      if(!r||!r.USD)throw 0;
+      rates=r;source="live";stamp=Date.now();
+      ls("fx_rates",JSON.stringify(r));ls("fx_stamp",String(stamp));
+      if(!rates[S.from])S.from="XAF";if(!rates[S.to])S.to="USD";
+      render();if(manual)toast(t("ok"));
+    }).catch(next);
+  }
+  return next();
+}
+
+/* ---------- events ---------- */
+function openSheet(w){target=w;$("q").value="";renderSheet();$("ov").classList.add("open");$("list").scrollTop=0}
+function closeSheet(){$("ov").classList.remove("open");$("q").blur()}
+function pick(c){
+  S[target]=c;S.recents=[c].concat(S.recents.filter(function(x){return x!==c})).slice(0,8);
+  if(S.from===S.to){S[target==="from"?"to":"from"]=target==="from"?S.to===c?"USD":S.to:S.from}
+  save();closeSheet();render();
+}
+$("amount").addEventListener("input",function(){S.amount=this.value;save();render()});
+$("chips").addEventListener("click",function(e){var b=e.target.closest(".chip");if(b){S.amount=b.dataset.a;$("amount").value=S.amount;save();render()}});
+$("fromBtn").onclick=function(){openSheet("from")};
+$("toBtn").onclick=function(){openSheet("to")};
+$("swap").onclick=function(){var f=S.from;S.from=S.to;S.to=f;var a=amt(),b=this;if(!isNaN(a)){S.amount=String(Math.round(conv(a,f,S.from)*100)/100)}
+  b.classList.add("spin");setTimeout(function(){b.classList.remove("spin")},260);save();render()};
+$("copy").onclick=function(){var a=amt();if(isNaN(a))return;var v=String(Math.round(conv(a,S.from,S.to)*1e6)/1e6);
+  try{navigator.clipboard.writeText(v).then(function(){toast(t("copied"))},function(){toast(t("fail"))})}catch(e){toast(t("fail"))}};
+$("refresh").onclick=function(){refresh(true)};
+$("favs").addEventListener("click",function(e){var r=e.target.closest(".row");if(r){S.to=r.dataset.c;save();render();window.scrollTo({top:0,behavior:"smooth"})}});
+$("list").addEventListener("click",function(e){
+  var s=e.target.closest(".star");
+  if(s){var c=s.dataset.s,i=S.favs.indexOf(c);if(i>-1)S.favs.splice(i,1);else S.favs.push(c);save();var y=$("list").scrollTop;renderSheet();$("list").scrollTop=y;render();return}
+  var it=e.target.closest(".it");if(it)pick(it.dataset.c);
+});
+$("q").addEventListener("input",renderSheet);
+$("closeSheet").onclick=closeSheet;
+$("ov").addEventListener("click",function(e){if(e.target===this)closeSheet()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeSheet()});
+$("langBtn").onclick=function(){S.lang=S.lang==="fr"?"en":"fr";save();render()};
+$("themeBtn").onclick=function(){S.theme=S.theme==="auto"?"dark":S.theme==="dark"?"light":"auto";save();applyTheme()};
+window.addEventListener("online",function(){refresh(false)});
+window.addEventListener("offline",function(){toast(t("offline"))});
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&(!stamp||Date.now()-stamp>36e5))refresh(false)});
+
+/* ---------- install / PWA ---------- */
+var dp=null,standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone;
+var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;$("installBtn").hidden=false});
+window.addEventListener("appinstalled",function(){$("installBtn").hidden=true;dp=null});
+if(ios&&!standalone)$("installBtn").hidden=false;
+$("installBtn").onclick=function(){if(dp){dp.prompt();dp.userChoice.then(function(){dp=null;$("installBtn").hidden=true})}else if(ios){toast(t("ios"))}};
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register("sw.js").catch(function(){})}
+
+applyTheme();render();refresh(false);
+})();
+</script>
+</body>
+</html>
